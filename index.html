@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Intel App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 40px 20px; }
+    .container { background: white; border-radius: 12px; padding: 40px; max-width: 700px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    h1 { font-size: 24px; margin-bottom: 8px; color: #1a1a1a; }
+    p.subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+    input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 12px; outline: none; }
+    input:focus { border-color: #4A90E2; }
+    button { width: 100%; padding: 12px; background: #4A90E2; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #357ABD; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    .result { margin-top: 28px; display: none; }
+    .result h2 { font-size: 18px; margin-bottom: 12px; color: #1a1a1a; }
+    .brief { background: #f9f9f9; border-radius: 8px; padding: 20px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: #333; }
+    .loading { text-align: center; color: #666; margin-top: 20px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enterprise Intel App</h1>
+    <p class="subtitle">Enter a company name to get an instant intelligence brief.</p>
+    <input type="text" id="companyInput" placeholder="e.g. Goldman Sachs, McKinsey, Google..." />
+    <button id="searchBtn" onclick="getCompanyBrief()">Get Brief</button>
+    <div class="loading" id="loading">Researching company...</div>
+    <div class="result" id="result">
+      <h2 id="companyName"></h2>
+      <div class="brief" id="brief"></div>
+    </div>
+  </div>
+
+  <script>
+    async function getCompanyBrief() {
+      const company = document.getElementById('companyInput').value.trim();
+      if (!company) return;
+
+      const btn = document.getElementById('searchBtn');
+      const loading = document.getElementById('loading');
+      const result = document.getElementById('result');
+
+      btn.disabled = true;
+      btn.textContent = 'Researching...';
+      loading.style.display = 'block';
+      result.style.display = 'none';
+
+      try {
+        const response = await fetch('http://localhost:8000/research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company: company })
+        });
+
+        const data = await response.json();
+        document.getElementById('companyName').textContent = company + ' — Intelligence Brief';
+        document.getElementById('brief').textContent = data.brief;
+        result.style.display = 'block';
+      } catch (error) {
+        alert('Something went wrong. Make sure your backend is running.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Get Brief';
+        loading.style.display = 'none';
+      }
+    }
+
+    document.getElementById('companyInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') getCompanyBrief();
+    });
+  </script>
+</body>
+</html>

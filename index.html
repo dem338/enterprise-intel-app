@@ -3,36 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enterprise Intel App</title>
+  <title>Enterprise Intel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 40px 20px; }
-    .container { background: white; border-radius: 12px; padding: 40px; max-width: 700px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-    h1 { font-size: 24px; margin-bottom: 8px; color: #1a1a1a; }
-    p.subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
-    input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 12px; outline: none; }
-    input:focus { border-color: #4A90E2; }
-    button { width: 100%; padding: 12px; background: #4A90E2; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    button:hover { background: #357ABD; }
-    button:disabled { background: #aaa; cursor: not-allowed; }
-    .result { margin-top: 28px; display: none; }
-    .result h2 { font-size: 18px; margin-bottom: 12px; color: #1a1a1a; }
-    .brief { background: #f9f9f9; border-radius: 8px; padding: 20px; white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: #333; }
-    .loading { text-align: center; color: #666; margin-top: 20px; display: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #0a0f0a; color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; }
+    nav { background: #0d120d; border-bottom: 0.5px solid #1a2e1a; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo { width: 28px; height: 28px; background: #1D9E75; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .nav-logo span { color: #fff; font-size: 13px; font-weight: 500; }
+    .nav-name { color: #e0e0e0; font-size: 14px; font-weight: 500; }
+    .nav-tag { font-size: 11px; color: #1D9E75; background: #0F2E1F; padding: 3px 8px; border-radius: 20px; border: 0.5px solid #1D9E75; }
+    main { flex: 1; max-width: 760px; width: 100%; margin: 0 auto; padding: 24px; }
+    .hero { padding: 56px 0 40px; text-align: center; }
+    .hero-label { display: inline-block; font-size: 11px; color: #1D9E75; background: #0F2E1F; border: 0.5px solid #1D9E75; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; letter-spacing: 0.05em; }
+    .hero h1 { font-size: 38px; font-weight: 600; color: #f0f0f0; line-height: 1.15; margin-bottom: 14px; }
+    .hero h1 span { color: #1D9E75; }
+    .hero p { font-size: 15px; color: #5a6b5a; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+    .search-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .search-row input { flex: 1; background: #111711; border: 0.5px solid #1a2e1a; border-radius: 8px; padding: 13px 16px; color: #c0c0c0; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .search-row input:focus { border-color: #1D9E75; }
+    .search-row input::placeholder { color: #3a5a3a; }
+    .search-row button { background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 13px 22px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; transition: background 0.2s; }
+    .search-row button:hover { background: #0F6E56; }
+    .search-row button:disabled { background: #0F2E1F; color: #3a5a3a; cursor: not-allowed; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+    .chip { font-size: 12px; padding: 6px 12px; background: #111711; border: 0.5px solid #1a2e1a; border-radius: 20px; color: #5a7a5a; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .chip:hover { border-color: #1D9E75; color: #1D9E75; background: #0F2E1F; }
+    .loading { text-align: center; padding: 48px; display: none; }
+    .spinner { width: 32px; height: 32px; border: 2px solid #1a2e1a; border-top-color: #1D9E75; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: #3a5a3a; font-size: 13px; }
+    .result { display: none; background: #111711; border: 0.5px solid #1a2e1a; border-radius: 12px; overflow: hidden; margin-bottom: 40px; }
+    .result-header { padding: 16px 20px; border-bottom: 0.5px solid #1a2e1a; display: flex; align-items: center; justify-content: space-between; }
+    .result-title { color: #e0e0e0; font-size: 15px; font-weight: 500; }
+    .result-badge { font-size: 11px; color: #1D9E75; background: #0F2E1F; padding: 3px 8px; border-radius: 20px; border: 0.5px solid #1D9E75; }
+    .result-body { padding: 20px; }
+    .section { margin-bottom: 20px; }
+    .section-label { font-size: 11px; color: #1D9E75; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .section-text { font-size: 14px; color: #7a8a7a; line-height: 1.7; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+    .metric { background: #0d120d; border: 0.5px solid #1a2e1a; border-radius: 8px; padding: 12px; }
+    .metric-label { font-size: 11px; color: #3a5a3a; margin-bottom: 4px; }
+    .metric-value { font-size: 14px; color: #c0c0c0; font-weight: 500; }
+    footer { border-top: 0.5px solid #1a2e1a; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-text { font-size: 11px; color: #2a3a2a; }
+    .footer-dot { width: 6px; height: 6px; background: #1D9E75; border-radius: 50%; display: inline-block; margin-right: 6px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Enterprise Intel App</h1>
-    <p class="subtitle">Enter a company name to get an instant intelligence brief.</p>
-    <input type="text" id="companyInput" placeholder="e.g. Goldman Sachs, McKinsey, Google..." />
-    <button id="searchBtn" onclick="getCompanyBrief()">Get Brief</button>
-    <div class="loading" id="loading">Researching company...</div>
-    <div class="result" id="result">
-      <h2 id="companyName"></h2>
-      <div class="brief" id="brief"></div>
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo"><span>EI</span></div>
+      <span class="nav-name">Enterprise Intel</span>
     </div>
-  </div>
+    <span class="nav-tag">AI Powered</span>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <div class="hero-label">COMPANY RESEARCH TOOL</div>
+      <h1>Know every company<br>before you <span>walk in.</span></h1>
+      <p>AI-powered intelligence briefs for interviews, coffee chats, and due diligence.</p>
+    </div>
+
+    <div class="search-row">
+      <input type="text" id="companyInput" placeholder="e.g. McKinsey, Goldman Sachs, Google..." />
+      <button id="searchBtn" onclick="getCompanyBrief()">Get Brief</button>
+    </div>
+
+    <div class="chips">
+      <button class="chip" onclick="quickSearch('McKinsey')">McKinsey</button>
+      <button class="chip" onclick="quickSearch('Goldman Sachs')">Goldman Sachs</button>
+      <button class="chip" onclick="quickSearch('Deloitte')">Deloitte</button>
+      <button class="chip" onclick="quickSearch('BCG')">BCG</button>
+      <button class="chip" onclick="quickSearch('BlackRock')">BlackRock</button>
+      <button class="chip" onclick="quickSearch('JP Morgan')">JP Morgan</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Researching company...</p>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-header">
+        <span class="result-title" id="companyName"></span>
+        <span class="result-badge">AI Brief</span>
+      </div>
+      <div class="result-body">
+        <div class="section">
+          <div class="section-label">WHAT THEY DO</div>
+          <div class="section-text" id="whatTheyDo"></div>
+        </div>
+        <div class="section">
+          <div class="section-label">RECENT NEWS</div>
+          <div class="section-text" id="recentNews"></div>
+        </div>
+        <div class="section">
+          <div class="section-label">BUSINESS MODEL</div>
+          <div class="section-text" id="businessModel"></div>
+        </div>
+        <div class="section">
+          <div class="section-label">SMART QUESTIONS TO ASK</div>
+          <div class="section-text" id="smartQuestions"></div>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">FOUNDED</div>
+            <div class="metric-value" id="metricFounded">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">EMPLOYEES</div>
+            <div class="metric-value" id="metricEmployees">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">HEADQUARTERS</div>
+            <div class="metric-value" id="metricHQ">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span class="footer-text"><span class="footer-dot"></span>Powered by Claude AI</span>
+    <span class="footer-text">Built by dem338</span>
+  </footer>
 
   <script>
     async function getCompanyBrief() {
@@ -56,16 +154,46 @@
         });
 
         const data = await response.json();
-        document.getElementById('companyName').textContent = company + ' — Intelligence Brief';
-        document.getElementById('brief').textContent = data.brief;
+        const brief = data.brief;
+
+        document.getElementById('companyName').textContent = company;
+
+        document.getElementById('whatTheyDo').textContent = extractSection(brief, 'What They Do', 'Recent News') || extractSection(brief, 'What they do', 'Recent') || brief.split('\n')[0];
+        document.getElementById('recentNews').textContent = extractSection(brief, 'Recent News', 'Business Model') || extractSection(brief, 'Recent', 'Business') || '';
+        document.getElementById('businessModel').textContent = extractSection(brief, 'Business Model', 'Key Facts') || extractSection(brief, 'Business model', 'Key') || '';
+        document.getElementById('smartQuestions').textContent = extractSection(brief, 'Smart Questions', 'Key Facts') || extractSection(brief, 'Questions', '') || '';
+
+        document.getElementById('metricFounded').textContent = extractMetric(brief, 'Founded') || '—';
+        document.getElementById('metricEmployees').textContent = extractMetric(brief, 'Employees') || '—';
+        document.getElementById('metricHQ').textContent = extractMetric(brief, 'Headquarters') || '—';
+
         result.style.display = 'block';
       } catch (error) {
-        alert('Something went wrong. Make sure your backend is running.');
+        alert('Something went wrong. Please try again.');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Get Brief';
         loading.style.display = 'none';
       }
+    }
+
+    function extractSection(text, startMarker, endMarker) {
+      const start = text.indexOf(startMarker);
+      if (start === -1) return null;
+      const afterStart = text.indexOf('\n', start) + 1;
+      const end = endMarker ? text.indexOf(endMarker, afterStart) : text.length;
+      return text.slice(afterStart, end === -1 ? text.length : end).replace(/[#*]/g, '').trim();
+    }
+
+    function extractMetric(text, label) {
+      const regex = new RegExp(label + '[^\\n]*?([\\d,]+[^\\n]*)', 'i');
+      const match = text.match(regex);
+      return match ? match[1].trim().slice(0, 30) : null;
+    }
+
+    function quickSearch(company) {
+      document.getElementById('companyInput').value = company;
+      getCompanyBrief();
     }
 
     document.getElementById('companyInput').addEventListener('keypress', function(e) {
